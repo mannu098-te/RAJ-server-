@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>R4J KEY GENERATOR — 5-Stage Verification & Key Portal</title>
+
+  <!-- Google Fonts: Inter, Orbitron & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Orbitron', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            void: '#0b0d12',
+            neonCyan: '#00f5d4',
+            neonMagenta: '#ff2a85',
+          },
+          animation: {
+            'float': 'float 5s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-7px)' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Base dark glassmorphic theme & ambient RGB glow */
+    body {
+      background-color: #0b0d12;
+      color: #f3f4f6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(circle at 16% 14%, rgba(0, 245, 212, 0.12) 0%, transparent 42%),
+        radial-gradient(circle at 84% 22%, rgba(255, 42, 133, 0.12) 0%, transparent 42%),
+        radial-gradient(circle at 50% 92%, rgba(0, 245, 212, 0.06) 0%, transparent 50%);
+    }
+
+    /* Subtle cyber grid background */
+    .cyber-grid {
+      background-size: 36px 36px;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    }
+
+    /* Rotating RGB border ring for the circular R4J emblem */
+    .rgb-ring {
+      background: conic-gradient(from 0deg, #00f5d4, #ff2a85, #7b2cbf, #00f5d4);
+      animation: spin 5.5s linear infinite;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Frosted translucent glass card */
+    .glass-panel {
+      background: rgba(16, 20, 30, 0.74);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(0, 245, 212, 0.06) inset;
+    }
+
+    .glass-panel:hover {
+      border-color: rgba(0, 245, 212, 0.25);
+    }
+
+    /* Stage transition animation */
+    @keyframes stageEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .stage-enter {
+      animation: stageEnter 0.28s ease-out forwards;
+    }
+
+    /* Key reveal pop animation */
+    @keyframes keyPop {
+      0% {
+        opacity: 0.35;
+        transform: scale(0.97);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .key-reveal {
+      animation: keyPop 0.3s ease-out forwards;
+    }
+
+    /* Shake animation when incomplete items are triggered */
+    @keyframes shakeItem {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .shake-item {
+      animation: shakeItem 0.42s ease-in-out;
+    }
+  </style>
+</head>
+<body class="cyber-grid flex flex-col justify-between antialiased selection:bg-neonCyan selection:text-void">
+
+  <!-- Toast Notification Banner -->
+  <div
+    id="toast"
+    role="status"
+    aria-live="polite"
+    class="fixed bottom-5 right-5 z-50 max-w-xs sm:max-w-sm transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none"
+  >
+    <div class="glass-panel border-neonCyan/50 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-2xl">
+      <div id="toast-icon-wrap" class="w-8 h-8 rounded-xl bg-neonCyan/15 border border-neonCyan/40 text-neonCyan flex items-center justify-center shrink-0">
+        <i id="toast-icon" class="fa-solid fa-check text-sm"></i>
+      </div>
+      <div class="min-w-0">
+        <p id="toast-title" class="text-xs sm:text-sm font-bold text-white truncate">Success</p>
+        <p id="toast-desc" class="text-xs text-gray-300 truncate">Action completed</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Wrapper -->
+  <main class="w-full max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex-grow flex flex-col justify-center space-y-6">
+
+    <!-- Subtle Top-Right Credit Pill Visible Across Every Step -->
+    <div class="flex justify-end">
+      <div
+        aria-label="Creator credit: Creat by mannu bhai"
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass-panel border-neonCyan/30 text-[11px] font-medium tracking-wide text-gray-300 shadow-[0_6px_20px_rgba(0,0,0,0.4)] select-none"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-neonMagenta shadow-[0_0_6px_rgba(255,42,133,0.9)] shrink-0"></span>
+        <span>Creat by mannu bhai</span>
+      </div>
+    </div>
+
+    <!-- Top Brand Header + Circular RGB R4J Emblem -->
+    <header class="text-center relative">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 rounded-full bg-gradient-to-tr from-neonCyan/20 via-transparent to-neonMagenta/20 blur-3xl -z-10"></div>
+
+      <!-- Circular RGB-Bordered R4J Emblem -->
+      <div class="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-4 animate-float">
+        <div class="w-full h-full rounded-full rgb-ring p-[3.5px] shadow-[0_0_28px_rgba(0,245,212,0.3),0_0_28px_rgba(255,42,133,0.22)]">
+          <div class="w-full h-full rounded-full bg-[#0b0d12] flex items-center justify-center">
+            <div class="w-[88%] h-[88%] rounded-full bg-gradient-to-b from-[#161c2a] to-[#0c0f17] border border-white/10 flex flex-col items-center justify-center">
+              <i class="fa-solid fa-key text-lg sm:text-xl text-neonCyan mb-0.5 drop-shadow-[0_0_8px_rgba(0,245,212,0.85)]"></i>
+              <span class="font-display font-black text-xs sm:text-sm tracking-widest text-white">R4J</span>
+              <span class="text-[7px] font-bold tracking-[0.2em] text-neonMagenta uppercase">PORTAL</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="font-display text-2xl sm:text-4xl font-black tracking-wider leading-tight">
+        <span class="bg-gradient-to-r from-white via-neonCyan to-neonMagenta bg-clip-text text-transparent">
+          R4J KEY GENERATOR
+        </span>
+      </h1>
+      <p id="stage-subtitle" class="mt-1.5 text-xs sm:text-sm text-gray-400">
+        Stage 1 of 5 — Gmail Account &amp; Sequential Verification
+      </p>
+    </header>
+
+    <!-- Top Stepper Indicator & Navigation Controls -->
+    <section aria-label="5-Stage Progress Stepper" class="glass-panel rounded-2xl p-4 sm:p-5 space-y-3.5">
+      <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-neonCyan shadow-[0_0_8px_rgba(0,245,212,0.9)] shrink-0"></span>
+          <span id="session-status-text" class="text-gray-300 truncate">
+            Guest Mode — Complete Stage 1 with Gmail
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+            id="reset-progress-btn"
+            type="button"
+            onclick="handleResetProgress()"
+            class="px-3 py-1.5 rounded-xl text-[11px] font-display font-bold uppercase tracking-wider text-gray-200 bg-white/5 hover:bg-white/10 border border-white/15 hover:border-neonCyan/40 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <i class="fa-solid fa-rotate-left text-neonCyan"></i>
+            <span>Reset Progress</span>
+          </button>
+
+          <button
+            id="sign-out-btn"
+            type="button"
+            onclick="handleSignOut()"
+            class="px-3 py-1.5 rounded-xl text-[11px] font-display font-bold uppercase tracking-wider text-white bg-neonMagenta/15 hover:bg-neonMagenta/25 border border-neonMagenta/45 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <i class="fa-solid fa-right-from-bracket text-neonMagenta"></i>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 5-Step Pills -->
+      <!-- 6-Stage Pills -->
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2">
+        <button
+          id="stepper-btn-1"
+          type="button"
+          onclick="navigateToStage('stage1')"
+          class="py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center"
+        >
+          <span class="font-display text-[10px] sm:text-xs font-bold">1. Gmail</span>
+          <span id="stepper-badge-1" class="text-[9px] font-semibold mt-0.5">Active</span>
+        </button>
+
+        <button
+          id="stepper-btn-2a"
+          type="button"
+          onclick="navigateToStage('stage2a')"
+          class="py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center"
+        >
+          <span class="font-display text-[10px] sm:text-xs font-bold">2A. YT</span>
+          <span id="stepper-badge-2a" class="text-[9px] font-semibold mt-0.5">Locked</span>
+        </button>
+
+        <button
+          id="stepper-btn-2b"
+          type="button"
+          onclick="navigateToStage('stage2b')"
+          class="py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center"
+        >
+          <span class="font-display text-[10px] sm:text-xs font-bold">2B. TG</span>
+          <span id="stepper-badge-2b" class="text-[9px] font-semibold mt-0.5">Locked</span>
+        </button>
+
+        <button
+          id="stepper-btn-2c"
+          type="button"
+          onclick="navigateToStage('stage2c')"
+          class="py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center"
+        >
+          <span class="font-display text-[10px] sm:text-xs font-bold">2C. IG</span>
+          <span id="stepper-badge-2c" class="text-[9px] font-semibold mt-0.5">Locked</span>
+        </button>
+
+        <button
+          id="stepper-btn-link"
+          type="button"
+          onclick="navigateToStage('stageLink')"
+          class="py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center"
+        >
+          <span class="font-display text-[10px] sm:text-xs font-bold">2.5 Link</span>
+          <span id="stepper-badge-link" class="text-[9px] font-semibold mt-0.5">Locked</span>
+        </button>
+
+        <button
+          id="stepper-btn-3"
+          type="button"
+          onclick="navigateToStage('stage3')"
+          class="py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center"
+        >
+          <span class="font-display text-[10px] sm:text-xs font-bold">3. Key</span>
+          <span id="stepper-badge-3" class="text-[9px] font-semibold mt-0.5">Locked</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PORTAL 1: LOGIN / CREATE ACCOUNT WITH GMAIL                          -->
+    <!-- ===================================================================== -->
+    <section id="portal-stage1" aria-label="Portal 1 Gmail Login and Registration" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden stage-enter">
+      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-neonCyan via-neonMagenta to-neonCyan"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+        <div>
+          <span class="text-[11px] font-display font-bold uppercase tracking-widest text-neonCyan">Portal 1 of 5</span>
+          <h2 class="font-display text-lg sm:text-xl font-bold text-white mt-0.5">Gmail Account Access</h2>
+        </div>
+        <span class="px-3 py-1 rounded-full text-[11px] font-semibold bg-neonCyan/10 text-neonCyan border border-neonCyan/30">
+          @gmail.com Required
+        </span>
+      </div>
+
+      <!-- Mode Toggle: Create Account vs Login -->
+      <div role="tablist" aria-label="Account Mode" class="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-[#07090d]/90 border border-white/10 mb-6">
+        <button
+          id="mode-signup-btn"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          onclick="switchAuthMode('signup')"
+          class="py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-r from-neonMagenta/25 to-neonMagenta/10 text-neonMagenta border border-neonMagenta/45 shadow-[0_0_16px_rgba(255,42,133,0.18)]"
+        >
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Create Account</span>
+        </button>
+
+        <button
+          id="mode-login-btn"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          onclick="switchAuthMode('login')"
+          class="py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer text-gray-400 hover:text-white border border-transparent"
+        >
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>Login</span>
+        </button>
+      </div>
+
+      <!-- CREATE ACCOUNT FORM -->
+      <form id="signup-form" novalidate onsubmit="handleCreateAccount(event)" class="space-y-4 stage-enter">
+        <div>
+          <label for="signup-name" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+            Full Name
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+              <i class="fa-solid fa-user text-xs"></i>
+            </span>
+            <input
+              id="signup-name"
+              type="text"
+              autocomplete="name"
+              placeholder="Enter your full name"
+              oninput="clearError('signup-name', 'signup-name-err')"
+              class="w-full pl-10 pr-4 py-3 rounded-xl bg-[#07090d]/90 border border-white/15 focus:border-neonMagenta focus:outline-none text-sm text-white placeholder-gray-500 transition-colors"
+            />
+          </div>
+          <p id="signup-name-err" class="hidden mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span></span>
+          </p>
+        </div>
+
+        <div>
+          <label for="signup-gmail" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+            Gmail Address (@gmail.com)
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+              <i class="fa-solid fa-envelope text-xs"></i>
+            </span>
+            <input
+              id="signup-gmail"
+              type="email"
+              autocomplete="email"
+              placeholder="yourname@gmail.com"
+              oninput="clearError('signup-gmail', 'signup-gmail-err')"
+              class="w-full pl-10 pr-4 py-3 rounded-xl bg-[#07090d]/90 border border-white/15 focus:border-neonMagenta focus:outline-none text-sm text-white placeholder-gray-500 transition-colors"
+            />
+          </div>
+          <p id="signup-gmail-err" class="hidden mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span></span>
+          </p>
+        </div>
+
+        <div>
+          <label for="signup-password" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+            Password
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+              <i class="fa-solid fa-lock text-xs"></i>
+            </span>
+            <input
+              id="signup-password"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Create a password (min 6 chars)"
+              oninput="updatePasswordStrength(); clearError('signup-password', 'signup-password-err')"
+              class="w-full pl-10 pr-11 py-3 rounded-xl bg-[#07090d]/90 border border-white/15 focus:border-neonMagenta focus:outline-none text-sm text-white placeholder-gray-500 transition-colors"
+            />
+            <button
+              type="button"
+              aria-label="Toggle create account password visibility"
+              onclick="togglePassword('signup-password', 'signup-eye')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-neonMagenta transition-colors cursor-pointer"
+            >
+              <i id="signup-eye" class="fa-regular fa-eye text-sm"></i>
+            </button>
+          </div>
+
+          <!-- Password Strength Meter -->
+          <div class="mt-2.5">
+            <div class="flex items-center justify-between text-[11px] mb-1">
+              <span class="text-gray-400">Password Strength</span>
+              <span id="strength-text" class="font-semibold text-gray-500">Enter password</span>
+            </div>
+            <div class="grid grid-cols-4 gap-1.5 h-1.5">
+              <div id="str-1" class="rounded-full bg-white/10 transition-all duration-300"></div>
+              <div id="str-2" class="rounded-full bg-white/10 transition-all duration-300"></div>
+              <div id="str-3" class="rounded-full bg-white/10 transition-all duration-300"></div>
+              <div id="str-4" class="rounded-full bg-white/10 transition-all duration-300"></div>
+            </div>
+          </div>
+
+          <p id="signup-password-err" class="hidden mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span></span>
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full mt-2 py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-white bg-gradient-to-r from-neonMagenta to-[#ff5e9e] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_24px_rgba(255,42,133,0.35)] flex items-center justify-center gap-2.5 cursor-pointer"
+        >
+          <span>Create Account &amp; Enter Portal 2A</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <!-- LOGIN FORM -->
+      <form id="login-form" novalidate onsubmit="handleLogin(event)" class="hidden space-y-4 stage-enter">
+        <div>
+          <label for="login-gmail" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+            Gmail Address (@gmail.com)
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+              <i class="fa-solid fa-envelope text-xs"></i>
+            </span>
+            <input
+              id="login-gmail"
+              type="email"
+              autocomplete="email"
+              placeholder="Enter registered @gmail.com"
+              oninput="clearError('login-gmail', 'login-gmail-err')"
+              class="w-full pl-10 pr-4 py-3 rounded-xl bg-[#07090d]/90 border border-white/15 focus:border-neonCyan focus:outline-none text-sm text-white placeholder-gray-500 transition-colors"
+            />
+          </div>
+          <p id="login-gmail-err" class="hidden mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span></span>
+          </p>
+        </div>
+
+        <div>
+          <label for="login-password" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+            Password
+          </label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+              <i class="fa-solid fa-lock text-xs"></i>
+            </span>
+            <input
+              id="login-password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Enter your password"
+              oninput="clearError('login-password', 'login-password-err')"
+              class="w-full pl-10 pr-11 py-3 rounded-xl bg-[#07090d]/90 border border-white/15 focus:border-neonCyan focus:outline-none text-sm text-white placeholder-gray-500 transition-colors"
+            />
+            <button
+              type="button"
+              aria-label="Toggle login password visibility"
+              onclick="togglePassword('login-password', 'login-eye')"
+              class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-neonCyan transition-colors cursor-pointer"
+            >
+              <i id="login-eye" class="fa-regular fa-eye text-sm"></i>
+            </button>
+          </div>
+          <p id="login-password-err" class="hidden mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span></span>
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full mt-2 py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-void bg-gradient-to-r from-neonCyan to-[#38f9d7] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_24px_rgba(0,245,212,0.35)] flex items-center justify-center gap-2.5 cursor-pointer"
+        >
+          <span>Login &amp; Enter Portal 2A</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PORTAL 2A: SUB-PORTAL 1/3 - YOUTUBE STEP + ADDITION QUIZ              -->
+    <!-- ===================================================================== -->
+    <section id="portal-stage2a" aria-label="Portal 2A YouTube Step and Addition Quiz" class="hidden glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden stage-enter space-y-6">
+      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#FF0033] via-neonCyan to-neonMagenta"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span class="text-[11px] font-display font-bold uppercase tracking-widest text-neonCyan">Sub-Portal 1/3 • Stage 2A</span>
+          <h2 class="font-display text-lg sm:text-xl font-bold text-white mt-0.5">YouTube Step + Addition Quiz</h2>
+        </div>
+        <span id="badge-2a" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35">
+          0/2 Tasks Done
+        </span>
+      </div>
+
+      <!-- YouTube Link & Verification Toggle -->
+      <div id="box-2a-social" class="rounded-2xl bg-[#07090d]/85 border border-white/10 p-4 sm:p-5 space-y-3.5 transition-all">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-xl bg-[#FF0033]/15 border border-[#FF0033]/40 text-[#ff4d6d] flex items-center justify-center shrink-0">
+              <i class="fa-brands fa-youtube text-xl"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-white truncate">Subscribe YouTube Channel</p>
+              <p class="text-xs text-gray-400 truncate">@r4jytofficial12</p>
+            </div>
+          </div>
+
+          <a
+            href="https://youtube.com/@r4jytofficial12?si=FZDzkXyapLskXL9W"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-4 py-2.5 rounded-xl text-xs font-display font-bold uppercase tracking-wider text-white bg-[#FF0033]/20 hover:bg-[#FF0033]/35 border border-[#FF0033]/50 transition-all flex items-center justify-center gap-2 shrink-0"
+          >
+            <i class="fa-brands fa-youtube"></i>
+            <span>Open YouTube</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+
+        <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-3">
+          <span class="text-xs text-gray-300">Confirm YouTube subscription:</span>
+          <button
+            id="toggle-2a-social"
+            type="button"
+            onclick="toggleSocialVerification('2a')"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all flex items-center gap-2 cursor-pointer bg-white/5 text-gray-300 border-white/15 hover:border-neonCyan/40"
+          >
+            <i id="icon-2a-social" class="fa-regular fa-square"></i>
+            <span id="label-2a-social">Mark Verified</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Addition Quiz Task -->
+      <div id="box-2a-quiz" class="rounded-2xl bg-[#07090d]/85 border border-white/10 p-4 sm:p-5 space-y-3.5 transition-all">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-display font-bold uppercase tracking-wider text-neonCyan">
+            <i class="fa-solid fa-plus mr-1.5"></i>Addition Math Quiz
+          </span>
+          <span id="quiz-status-2a" class="text-[11px] font-semibold text-amber-300">Unverified</span>
+        </div>
+
+        <p class="text-sm sm:text-base font-bold text-white">
+          What is <span class="font-mono text-neonCyan">14 + 29</span>?
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <input
+            id="input-2a-quiz"
+            type="number"
+            inputmode="numeric"
+            placeholder="Enter answer"
+            oninput="handleQuizInputChange('2a')"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-[#0b0d12] border border-white/15 focus:border-neonCyan focus:outline-none text-sm font-mono text-white placeholder-gray-500 transition-colors"
+          />
+          <button
+            type="button"
+            onclick="verifyQuizTask('2a', 43)"
+            class="px-4 py-2.5 rounded-xl font-display text-xs font-bold uppercase tracking-wider text-void bg-neonCyan hover:brightness-110 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
+          >
+            <i class="fa-solid fa-check-circle"></i>
+            <span>Verify Task</span>
+          </button>
+        </div>
+
+        <p id="feedback-2a-quiz" class="hidden text-xs font-medium"></p>
+      </div>
+
+      <!-- Hinglish Warning Banner for 2A -->
+      <div id="warn-2a" role="alert" class="hidden rounded-2xl bg-neonMagenta/15 border border-neonMagenta/50 p-4 text-xs sm:text-sm font-semibold text-white stage-enter"></div>
+
+      <!-- Continue to Portal 2/3 (Stage 2B) -->
+      <button
+        type="button"
+        onclick="proceedFromStage('2a', 'stage2b')"
+        class="w-full py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-void bg-gradient-to-r from-neonCyan to-[#38f9d7] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_24px_rgba(0,245,212,0.35)] flex items-center justify-center gap-2.5 cursor-pointer"
+      >
+        <span>Continue to Portal 2/3</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PORTAL 2B: SUB-PORTAL 2/3 - TELEGRAM STEP + MULTIPLICATION QUIZ       -->
+    <!-- ===================================================================== -->
+    <section id="portal-stage2b" aria-label="Portal 2B Telegram Step and Multiplication Quiz" class="hidden glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden stage-enter space-y-6">
+      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#2AABEE] via-neonCyan to-neonMagenta"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span class="text-[11px] font-display font-bold uppercase tracking-widest text-neonCyan">Sub-Portal 2/3 • Stage 2B</span>
+          <h2 class="font-display text-lg sm:text-xl font-bold text-white mt-0.5">Telegram Step + Multiplication Quiz</h2>
+        </div>
+        <span id="badge-2b" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35">
+          0/2 Tasks Done
+        </span>
+      </div>
+
+      <!-- Telegram Link & Verification Toggle -->
+      <div id="box-2b-social" class="rounded-2xl bg-[#07090d]/85 border border-white/10 p-4 sm:p-5 space-y-3.5 transition-all">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-xl bg-[#2AABEE]/15 border border-[#2AABEE]/40 text-[#38bdf8] flex items-center justify-center shrink-0">
+              <i class="fa-brands fa-telegram text-xl"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-white truncate">Join Official Telegram Channel</p>
+              <p class="text-xs text-gray-400 truncate">R4J Community Updates</p>
+            </div>
+          </div>
+
+          <a
+            href="https://t.me/+N2B5qGgol-lhYTI1"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-4 py-2.5 rounded-xl text-xs font-display font-bold uppercase tracking-wider text-white bg-[#2AABEE]/20 hover:bg-[#2AABEE]/35 border border-[#2AABEE]/50 transition-all flex items-center justify-center gap-2 shrink-0"
+          >
+            <i class="fa-brands fa-telegram"></i>
+            <span>Join Telegram</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+
+        <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-3">
+          <span class="text-xs text-gray-300">Confirm Telegram channel join:</span>
+          <button
+            id="toggle-2b-social"
+            type="button"
+            onclick="toggleSocialVerification('2b')"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all flex items-center gap-2 cursor-pointer bg-white/5 text-gray-300 border-white/15 hover:border-neonCyan/40"
+          >
+            <i id="icon-2b-social" class="fa-regular fa-square"></i>
+            <span id="label-2b-social">Mark Verified</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Multiplication Quiz Task -->
+      <div id="box-2b-quiz" class="rounded-2xl bg-[#07090d]/85 border border-white/10 p-4 sm:p-5 space-y-3.5 transition-all">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-display font-bold uppercase tracking-wider text-neonCyan">
+            <i class="fa-solid fa-xmark mr-1.5"></i>Multiplication Math Quiz
+          </span>
+          <span id="quiz-status-2b" class="text-[11px] font-semibold text-amber-300">Unverified</span>
+        </div>
+
+        <p class="text-sm sm:text-base font-bold text-white">
+          What is <span class="font-mono text-neonCyan">8 × 7</span>?
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <input
+            id="input-2b-quiz"
+            type="number"
+            inputmode="numeric"
+            placeholder="Enter answer"
+            oninput="handleQuizInputChange('2b')"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-[#0b0d12] border border-white/15 focus:border-neonCyan focus:outline-none text-sm font-mono text-white placeholder-gray-500 transition-colors"
+          />
+          <button
+            type="button"
+            onclick="verifyQuizTask('2b', 56)"
+            class="px-4 py-2.5 rounded-xl font-display text-xs font-bold uppercase tracking-wider text-void bg-neonCyan hover:brightness-110 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
+          >
+            <i class="fa-solid fa-check-circle"></i>
+            <span>Verify Task</span>
+          </button>
+        </div>
+
+        <p id="feedback-2b-quiz" class="hidden text-xs font-medium"></p>
+      </div>
+
+      <!-- Hinglish Warning Banner for 2B -->
+      <div id="warn-2b" role="alert" class="hidden rounded-2xl bg-neonMagenta/15 border border-neonMagenta/50 p-4 text-xs sm:text-sm font-semibold text-white stage-enter"></div>
+
+      <!-- Continue to Portal 3/3 (Stage 2C) -->
+      <button
+        type="button"
+        onclick="proceedFromStage('2b', 'stage2c')"
+        class="w-full py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-void bg-gradient-to-r from-neonCyan to-[#38f9d7] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_24px_rgba(0,245,212,0.35)] flex items-center justify-center gap-2.5 cursor-pointer"
+      >
+        <span>Continue to Portal 3/3</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PORTAL 2C: SUB-PORTAL 3/3 - INSTAGRAM STEP + MIXED MATH QUIZ          -->
+    <!-- ===================================================================== -->
+    <section id="portal-stage2c" aria-label="Portal 2C Instagram Step and Mixed Math Quiz" class="hidden glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden stage-enter space-y-6">
+      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#E1306C] via-neonMagenta to-neonCyan"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span class="text-[11px] font-display font-bold uppercase tracking-widest text-neonMagenta">Sub-Portal 3/3 • Stage 2C</span>
+          <h2 class="font-display text-lg sm:text-xl font-bold text-white mt-0.5">Instagram Step + Mixed Math Quiz</h2>
+        </div>
+        <span id="badge-2c" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35">
+          0/2 Tasks Done
+        </span>
+      </div>
+
+      <!-- Instagram Link & Verification Toggle -->
+      <div id="box-2c-social" class="rounded-2xl bg-[#07090d]/85 border border-white/10 p-4 sm:p-5 space-y-3.5 transition-all">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-xl bg-[#E1306C]/15 border border-[#E1306C]/40 text-[#ff5e9e] flex items-center justify-center shrink-0">
+              <i class="fa-brands fa-instagram text-xl"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-white truncate">Follow on Instagram</p>
+              <p class="text-xs text-gray-400 truncate">@manauwar09</p>
+            </div>
+          </div>
+
+          <a
+            href="https://www.instagram.com/manauwar09/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="px-4 py-2.5 rounded-xl text-xs font-display font-bold uppercase tracking-wider text-white bg-[#E1306C]/20 hover:bg-[#E1306C]/35 border border-[#E1306C]/50 transition-all flex items-center justify-center gap-2 shrink-0"
+          >
+            <i class="fa-brands fa-instagram"></i>
+            <span>Follow @manauwar09</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+
+        <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-3">
+          <span class="text-xs text-gray-300">Confirm Instagram follow:</span>
+          <button
+            id="toggle-2c-social"
+            type="button"
+            onclick="toggleSocialVerification('2c')"
+            class="px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all flex items-center gap-2 cursor-pointer bg-white/5 text-gray-300 border-white/15 hover:border-neonMagenta/40"
+          >
+            <i id="icon-2c-social" class="fa-regular fa-square"></i>
+            <span id="label-2c-social">Mark Verified</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mixed Math Quiz Task -->
+      <div id="box-2c-quiz" class="rounded-2xl bg-[#07090d]/85 border border-white/10 p-4 sm:p-5 space-y-3.5 transition-all">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-display font-bold uppercase tracking-wider text-neonMagenta">
+            <i class="fa-solid fa-calculator mr-1.5"></i>Mixed Math Quiz
+          </span>
+          <span id="quiz-status-2c" class="text-[11px] font-semibold text-amber-300">Unverified</span>
+        </div>
+
+        <p class="text-sm sm:text-base font-bold text-white">
+          What is <span class="font-mono text-neonMagenta">45 - 18 + 6</span>?
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <input
+            id="input-2c-quiz"
+            type="number"
+            inputmode="numeric"
+            placeholder="Enter answer"
+            oninput="handleQuizInputChange('2c')"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-[#0b0d12] border border-white/15 focus:border-neonMagenta focus:outline-none text-sm font-mono text-white placeholder-gray-500 transition-colors"
+          />
+          <button
+            type="button"
+            onclick="verifyQuizTask('2c', 33)"
+            class="px-4 py-2.5 rounded-xl font-display text-xs font-bold uppercase tracking-wider text-white bg-neonMagenta hover:brightness-110 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
+          >
+            <i class="fa-solid fa-check-circle"></i>
+            <span>Verify Task</span>
+          </button>
+        </div>
+
+        <p id="feedback-2c-quiz" class="hidden text-xs font-medium"></p>
+      </div>
+
+      <!-- Hinglish Warning Banner for 2C -->
+      <div id="warn-2c" role="alert" class="hidden rounded-2xl bg-neonMagenta/15 border border-neonMagenta/50 p-4 text-xs sm:text-sm font-semibold text-white stage-enter"></div>
+
+      <!-- Unlock Key Generator (Stage 3) -->
+      <!-- Unlock Your Link Portal (Step 2.5) -->
+      <button
+        type="button"
+        onclick="proceedFromStage('2c', 'stageLink')"
+        class="w-full py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-white bg-gradient-to-r from-neonMagenta to-[#ff5e9e] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_24px_rgba(255,42,133,0.35)] flex items-center justify-center gap-2.5 cursor-pointer"
+      >
+        <i class="fa-solid fa-link"></i>
+        <span>Continue to Your Link</span>
+      </button>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PORTAL 2.5: YOUR LINK DESTINATION PORTAL                              -->
+    <!-- ===================================================================== -->
+    <section id="portal-stageLink" aria-label="Portal 2.5 Your Link Destination" class="hidden glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden stage-enter space-y-6">
+      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-neonCyan via-neonMagenta to-neonCyan"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span class="text-[11px] font-display font-bold uppercase tracking-widest text-neonCyan">Step 2.5 • Intermediate Link</span>
+          <h2 class="font-display text-lg sm:text-xl font-bold text-white mt-0.5">YOUR LINK</h2>
+        </div>
+        <span id="badge-your-link" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35">
+          Visit Required
+        </span>
+      </div>
+
+      <!-- Unlocked Link Destination Card -->
+      <div id="box-your-link" class="rounded-2xl bg-[#07090d]/85 border border-white/10 p-4 sm:p-5 space-y-4 transition-all">
+        <div class="flex items-start sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-xl bg-neonCyan/15 border border-neonCyan/40 text-neonCyan flex items-center justify-center shrink-0">
+              <i class="fa-solid fa-link text-lg"></i>
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-white truncate">Unlocked Destination Link</p>
+              <p class="text-xs text-gray-400 mt-0.5">Open or copy Your Link to unlock the Key Generator.</p>
+            </div>
+          </div>
+
+          <span id="status-your-link" class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-amber-500/15 text-amber-300 border border-amber-400/35 shrink-0">
+            Pending
+          </span>
+        </div>
+
+        <div class="rounded-xl bg-[#0b0d12] border border-white/15 px-3.5 py-3 flex items-center justify-between gap-2">
+          <span id="your-link-url-text" class="font-mono text-xs sm:text-sm text-neonCyan truncate select-all">
+            https://r4j-portal.example/unlock-session
+          </span>
+          <i class="fa-solid fa-shield-check text-emerald-400 text-sm shrink-0"></i>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onclick="handleOpenYourLink()"
+            class="py-3 px-4 rounded-xl font-display text-xs font-bold uppercase tracking-wider text-void bg-gradient-to-r from-neonCyan to-[#38f9d7] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_20px_rgba(0,245,212,0.28)] flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Open Your Link</span>
+          </button>
+
+          <button
+            type="button"
+            onclick="handleCopyYourLink()"
+            class="py-3 px-4 rounded-xl font-display text-xs font-bold uppercase tracking-wider text-white bg-white/5 hover:bg-white/10 border border-white/15 hover:border-neonMagenta/50 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <i class="fa-regular fa-copy text-neonMagenta"></i>
+            <span>Copy Link</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hinglish Warning Banner for Your Link -->
+      <div id="warn-your-link" role="alert" class="hidden rounded-2xl bg-neonMagenta/15 border border-neonMagenta/50 p-4 text-xs sm:text-sm font-semibold text-white stage-enter"></div>
+
+      <!-- Continue to Key Generator -->
+      <button
+        type="button"
+        onclick="proceedFromYourLink()"
+        class="w-full py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-white bg-gradient-to-r from-neonMagenta to-[#ff5e9e] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_24px_rgba(255,42,133,0.35)] flex items-center justify-center gap-2.5 cursor-pointer"
+      >
+        <i class="fa-solid fa-key"></i>
+        <span>Continue to Key Generator</span>
+      </button>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PORTAL 3: FINAL KEY GENERATOR PORTAL                                  -->
+    <!-- ===================================================================== -->
+    <section id="portal-stage3" aria-label="Portal 3 Final Key Generator" class="hidden glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden stage-enter space-y-6">
+      <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-neonCyan via-neonMagenta to-neonCyan"></div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span class="text-[11px] font-display font-bold uppercase tracking-widest text-neonCyan">Final Portal • Stage 3 of 5</span>
+          <h2 class="font-display text-lg sm:text-xl font-bold text-white mt-0.5">R4J Key Generator</h2>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-400/15 text-emerald-300 border border-emerald-400/40">
+          All Stages Verified ✓
+        </span>
+      </div>
+
+      <!-- Completion Summary for Portal 1 and Sub-Portals 2A, 2B, 2C -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="rounded-2xl bg-[#07090d]/85 border border-emerald-400/30 p-3.5 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Portal 1 • Gmail Account</p>
+            <p id="summary-gmail" class="text-xs font-mono font-bold text-white truncate mt-0.5">—</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-400/15 text-emerald-300 border border-emerald-400/35 shrink-0">
+            Done ✓
+          </span>
+        </div>
+
+        <div class="rounded-2xl bg-[#07090d]/85 border border-emerald-400/30 p-3.5 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Sub-Portal 2A • YT + Addition</p>
+            <p class="text-xs font-semibold text-gray-200 truncate mt-0.5">Channel + 14 + 29 = 43</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-400/15 text-emerald-300 border border-emerald-400/35 shrink-0">
+            Done ✓
+          </span>
+        </div>
+
+        <div class="rounded-2xl bg-[#07090d]/85 border border-emerald-400/30 p-3.5 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Sub-Portal 2B • TG + Multiply</p>
+            <p class="text-xs font-semibold text-gray-200 truncate mt-0.5">Channel + 8 × 7 = 56</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-400/15 text-emerald-300 border border-emerald-400/35 shrink-0">
+            Done ✓
+          </span>
+        </div>
+
+        <div class="sm:col-span-2 rounded-2xl bg-[#07090d]/85 border border-emerald-400/30 p-3.5 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Step 2.5 • YOUR LINK</p>
+            <p class="text-xs font-mono font-semibold text-neonCyan truncate mt-0.5">https://r4j-portal.example/unlock-session</p>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-400/15 text-emerald-300 border border-emerald-400/35 shrink-0">
+            Visited ✓
+          </span>
+        </div>
+      </div>
+
+      <!-- Key Display Box -->
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+          Generated Key Output
+        </label>
+        <div
+          id="key-display-box"
+          class="min-h-[68px] rounded-2xl bg-[#07090d]/95 border border-white/15 px-4 py-4 flex items-center justify-center text-center transition-all"
+        >
+          <div id="key-idle-state" class="flex items-center gap-2 text-gray-500 text-xs sm:text-sm">
+            <i class="fa-solid fa-key text-neonCyan"></i>
+            <span>Click GENERATE KEY to reveal your key</span>
+          </div>
+
+          <div id="key-loading-state" class="hidden items-center gap-3 text-neonCyan text-xs sm:text-sm font-semibold">
+            <span class="w-4 h-4 rounded-full border-2 border-neonCyan border-t-transparent animate-spin"></span>
+            <span>Generating key...</span>
+          </div>
+
+          <div id="key-ready-state" class="hidden items-center justify-center">
+            <span id="final-key-text" class="font-mono font-bold text-lg sm:text-2xl tracking-wider text-neonCyan drop-shadow-[0_0_12px_rgba(0,245,212,0.6)]">
+              [RAJ-MANNU-B4H-65]
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GENERATE KEY & COPY KEY Buttons -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <button
+          id="generate-key-btn"
+          type="button"
+          onclick="handleGenerateKey()"
+          class="py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-void bg-gradient-to-r from-neonCyan to-[#38f9d7] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_24px_rgba(0,245,212,0.35)] flex items-center justify-center gap-2.5 cursor-pointer"
+        >
+          <i class="fa-solid fa-key"></i>
+          <span>GENERATE KEY</span>
+        </button>
+
+        <button
+          id="copy-key-btn"
+          type="button"
+          disabled
+          onclick="handleCopyKey()"
+          class="py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-white bg-white/5 border border-white/15 opacity-50 cursor-not-allowed transition-all flex items-center justify-center gap-2.5"
+        >
+          <i class="fa-regular fa-copy"></i>
+          <span>COPY KEY</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 bg-[#080a0f]/80 py-4 px-4 text-center text-xs text-gray-500">
+    <p class="flex flex-wrap items-center justify-center gap-2">
+      <span class="font-display font-semibold text-gray-300">R4J KEY GENERATOR</span>
+      <span>•</span>
+      <span>5-Stage Sequential Portal</span>
+    </p>
+  </footer>
+
+  <script>
+    // Storage keys & constants
+    const STORAGE_USERS_KEY = 'r4j_5stage_users_v1';
+    const STORAGE_STATE_KEY = 'r4j_5stage_state_v1';
+    const STORAGE_USERS_KEY = 'r4j_6stage_users_v1';
+    const STORAGE_STATE_KEY = 'r4j_6stage_state_v1';
+    const EXACT_KEY_STRING = '[RAJ-MANNU-B4H-65]';
+    const YOUR_LINK_URL = 'https://r4j-portal.example/unlock-session';
+
+    const STAGE_ORDER = ['stage1', 'stage2a', 'stage2b', 'stage2c', 'stageLink', 'stage3'];
+    const STAGE_SUBTITLES = {
+      stage1: 'Step 1 — Create Account or Login with Gmail',
+      stage2a: 'Step 2 (Portal 2A 1/3) — YouTube Step + Addition Quiz',
+      stage2b: 'Step 2 (Portal 2B 2/3) — Telegram Step + Multiplication Quiz',
+      stage2c: 'Step 2 (Portal 2C 3/3) — Instagram Step + Mixed Math Quiz',
+      stageLink: 'Step 2.5 — YOUR LINK Destination Verification',
+      stage3: 'Step 3 (Final Portal) — Generate & Copy Your Access Key',
+    };
+
+    // Default persisted portal state
+    function createInitialState() {
+      return {
+        currentStage: 'stage1',
+        authMode: 'signup',
+        authenticatedUser: null, // { name, gmail }
+        tasks: {
+          '2a': { socialDone: false, quizDone: false, quizInput: '' },
+          '2b': { socialDone: false, quizDone: false, quizInput: '' },
+          '2c': { socialDone: false, quizDone: false, quizInput: '' },
+        },
+        yourLinkVisited: false,
+        keyGenerated: false,
+      };
+    }
+
+    let portalState = createInitialState();
+    let isGenerating = false;
+    let generateTimer = null;
+    let toastTimer = null;
+
+    /**
+     * Loads registered Gmail accounts from localStorage.
+     */
+    function loadUsers() {
+      try {
+        const raw = localStorage.getItem(STORAGE_USERS_KEY);
+        const list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    /**
+     * Saves registered Gmail accounts to localStorage.
+     */
+    function saveUsers(users) {
+      try {
+        localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(users));
+      } catch (err) {
+        showToast('Storage Error', 'Unable to save account in localStorage.', 'magenta');
+      }
+    }
+
+    /**
+     * Persists current 5-stage progress & session to localStorage.
+     */
+    function persistPortalState() {
+      try {
+        localStorage.setItem(STORAGE_STATE_KEY, JSON.stringify(portalState));
+      } catch (err) {
+        // Ignore storage quota/private mode issues
+      }
+    }
+
+    /**
+     * Restores saved state from localStorage if available.
+     */
+    function hydratePortalState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_STATE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        const base = createInitialState();
+        portalState = {
+          ...base,
+          ...parsed,
+          tasks: {
+            '2a': { ...base.tasks['2a'], ...(parsed.tasks && parsed.tasks['2a']) },
+            '2b': { ...base.tasks['2b'], ...(parsed.tasks && parsed.tasks['2b']) },
+            '2c': { ...base.tasks['2c'], ...(parsed.tasks && parsed.tasks['2c']) },
+          },
+        };
+      } catch (err) {
+        portalState = createInitialState();
+      }
+    }
+
+    /**
+     * Checks whether a given stage is unlocked based on strict sequential rules.
+     */
+    function isStageUnlocked(stageId) {
+      const hasAccount = Boolean(portalState.authenticatedUser && portalState.authenticatedUser.gmail);
+      const done2a = portalState.tasks['2a'].socialDone && portalState.tasks['2a'].quizDone;
+      const done2b = portalState.tasks['2b'].socialDone && portalState.tasks['2b'].quizDone;
+      const done2c = portalState.tasks['2c'].socialDone && portalState.tasks['2c'].quizDone;
+      const linkDone = Boolean(portalState.yourLinkVisited);
+
+      switch (stageId) {
+        case 'stage1':
+          return true;
+        case 'stage2a':
+          return hasAccount;
+        case 'stage2b':
+          return hasAccount && done2a;
+        case 'stage2c':
+          return hasAccount && done2a && done2b;
+        case 'stageLink':
+          return hasAccount && done2a && done2b && done2c;
+        case 'stage3':
+          return hasAccount && done2a && done2b && done2c && linkDone;
+        default:
+          return false;
+      }
+    }
+
+    /**
+     * Navigates to a stage if unlocked; otherwise shows a clear Hinglish guidance toast.
+     */
+    function navigateToStage(stageId) {
+      if (!STAGE_ORDER.includes(stageId)) return;
+
+      if (!isStageUnlocked(stageId)) {
+        if (!portalState.authenticatedUser) {
+          showToast('Stage Locked', 'Pehle Step 1 mein apna Gmail account create ya login karo!', 'magenta');
+        } else if (!portalState.tasks['2a'].socialDone || !portalState.tasks['2a'].quizDone) {
+          showToast('Stage Locked', 'Pehle Portal 2A (YouTube + Addition Quiz) complete karo!', 'magenta');
+        } else if (!portalState.tasks['2b'].socialDone || !portalState.tasks['2b'].quizDone) {
+          showToast('Stage Locked', 'Pehle Portal 2B (Telegram + Multiplication Quiz) complete karo!', 'magenta');
+        } else if (!portalState.tasks['2c'].socialDone || !portalState.tasks['2c'].quizDone) {
+          showToast('Stage Locked', 'Pehle Portal 2C (Instagram + Mixed Quiz) complete karo!', 'magenta');
+        } else if (!portalState.yourLinkVisited) {
+          showToast('Stage Locked', 'Pehle Step 2.5 YOUR LINK open ya confirm karo!', 'magenta');
+        }
+        return;
+      }
+
+      portalState.currentStage = stageId;
+      persistPortalState();
+      renderAllUI();
+    }
+
+    /**
+     * Switches Portal 1 between Create Account and Login tabs.
+     */
+    function switchAuthMode(mode) {
+      portalState.authMode = mode === 'login' ? 'login' : 'signup';
+      persistPortalState();
+
+      const signupBtn = document.getElementById('mode-signup-btn');
+      const loginBtn = document.getElementById('mode-login-btn');
+      const signupForm = document.getElementById('signup-form');
+      const loginForm = document.getElementById('login-form');
+
+      if (portalState.authMode === 'signup') {
+        signupBtn.setAttribute('aria-selected', 'true');
+        loginBtn.setAttribute('aria-selected', 'false');
+        signupBtn.className =
+          'py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-r from-neonMagenta/25 to-neonMagenta/10 text-neonMagenta border border-neonMagenta/45 shadow-[0_0_16px_rgba(255,42,133,0.18)]';
+        loginBtn.className =
+          'py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer text-gray-400 hover:text-white border border-transparent';
+
+        loginForm.classList.add('hidden');
+        signupForm.classList.remove('hidden', 'stage-enter');
+        void signupForm.offsetWidth;
+        signupForm.classList.add('stage-enter');
+      } else {
+        loginBtn.setAttribute('aria-selected', 'true');
+        signupBtn.setAttribute('aria-selected', 'false');
+        loginBtn.className =
+          'py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-r from-neonCyan/25 to-neonCyan/10 text-neonCyan border border-neonCyan/45 shadow-[0_0_16px_rgba(0,245,212,0.18)]';
+        signupBtn.className =
+          'py-2.5 px-3 rounded-xl font-display text-xs sm:text-sm font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer text-gray-400 hover:text-white border border-transparent';
+
+        signupForm.classList.add('hidden');
+        loginForm.classList.remove('hidden', 'stage-enter');
+        void loginForm.offsetWidth;
+        loginForm.classList.add('stage-enter');
+      }
+    }
+
+    /**
+     * Toggles password input visibility between password and text.
+     */
+    function togglePassword(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (!input || !icon) return;
+
+      const hidden = input.type === 'password';
+      input.type = hidden ? 'text' : 'password';
+      icon.className = hidden ? 'fa-regular fa-eye-slash text-sm' : 'fa-regular fa-eye text-sm';
+    }
+
+    /**
+     * Updates the 4-bar password strength meter on Create Account.
+     */
+    function updatePasswordStrength() {
+      const pwd = document.getElementById('signup-password').value || '';
+      const label = document.getElementById('strength-text');
+      const bars = [
+        document.getElementById('str-1'),
+        document.getElementById('str-2'),
+        document.getElementById('str-3'),
+        document.getElementById('str-4'),
+      ];
+
+      let score = 0;
+      if (pwd.length >= 6) score++;
+      if (pwd.length >= 9 && /[A-Z]/.test(pwd)) score++;
+      if (/[0-9]/.test(pwd)) score++;
+      if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+      const palette = {
+        0: { text: pwd.length > 0 ? 'Too Short' : 'Enter password', cls: 'text-gray-500', bar: 'bg-white/10' },
+        1: { text: 'Weak', cls: 'text-red-400', bar: 'bg-red-500' },
+        2: { text: 'Fair', cls: 'text-amber-400', bar: 'bg-amber-400' },
+        3: { text: 'Good', cls: 'text-neonCyan', bar: 'bg-neonCyan' },
+        4: { text: 'Strong', cls: 'text-emerald-400', bar: 'bg-emerald-400' },
+      };
+
+      const level = pwd.length === 0 ? 0 : Math.max(1, score);
+      const item = palette[level];
+      label.textContent = item.text;
+      label.className = `font-semibold ${item.cls}`;
+
+      bars.forEach((bar, idx) => {
+        bar.className = 'rounded-full transition-all duration-300 ' + (idx < level && pwd.length > 0 ? item.bar : 'bg-white/10');
+      });
+    }
+
+    /**
+     * Shows an inline field error message.
+     */
+    function showFieldError(inputId, errId, msg) {
+      const input = document.getElementById(inputId);
+      const err = document.getElementById(errId);
+      if (input) {
+        input.classList.remove('border-white/15', 'focus:border-neonCyan', 'focus:border-neonMagenta');
+        input.classList.add('border-red-500/75');
+      }
+      if (err) {
+        const span = err.querySelector('span');
+        if (span) span.textContent = msg;
+        err.classList.remove('hidden');
+      }
+    }
+
+    /**
+     * Clears inline field error message when typing.
+     */
+    function clearError(inputId, errId) {
+      const input = document.getElementById(inputId);
+      const err = document.getElementById(errId);
+      if (input) {
+        input.classList.remove('border-red-500/75');
+        input.classList.add('border-white/15');
+      }
+      if (err) {
+        err.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Validates that email ends strictly with @gmail.com.
+     */
+    function isValidGmail(email) {
+      return /^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(email.trim());
+    }
+
+    /**
+     * Handles Create Account form submission, stores credentials in localStorage, and opens Portal 2A.
+     */
+    function handleCreateAccount(event) {
+      event.preventDefault();
+
+      const nameInput = document.getElementById('signup-name');
+      const gmailInput = document.getElementById('signup-gmail');
+      const pwdInput = document.getElementById('signup-password');
+
+      const name = nameInput.value.trim();
+      const gmail = gmailInput.value.trim().toLowerCase();
+      const password = pwdInput.value;
+
+      let valid = true;
+
+      if (!name || name.length < 2) {
+        showFieldError('signup-name', 'signup-name-err', 'Please enter your full name (min 2 characters).');
+        valid = false;
+      }
+
+      if (!gmail) {
+        showFieldError('signup-gmail', 'signup-gmail-err', 'Please enter your Gmail address.');
+        valid = false;
+      } else if (!isValidGmail(gmail)) {
+        showFieldError('signup-gmail', 'signup-gmail-err', 'Email must end with @gmail.com.');
+        valid = false;
+      }
+
+      if (!password || password.length < 6) {
+        showFieldError('signup-password', 'signup-password-err', 'Password must be at least 6 characters.');
+        valid = false;
+      }
+
+      if (!valid) {
+        showToast('Invalid Details', 'Please check Name, @gmail.com address, and Password.', 'magenta');
+        return;
+      }
+
+      const users = loadUsers();
+      const existingIndex = users.findIndex((u) => u.gmail.toLowerCase() === gmail);
+
+      if (existingIndex !== -1) {
+        users[existingIndex] = { name, gmail, password };
+      } else {
+        users.push({ name, gmail, password });
+      }
+      saveUsers(users);
+
+      portalState.authenticatedUser = { name, gmail };
+      portalState.currentStage = 'stage2a';
+      persistPortalState();
+
+      document.getElementById('signup-form').reset();
+      updatePasswordStrength();
+
+      renderAllUI();
+      showToast('Account Created!', `Welcome ${gmail} — Portal 2A unlocked.`, 'cyan');
+    }
+
+    /**
+     * Handles Login form submission against stored @gmail.com credentials and opens Portal 2A.
+     */
+    function handleLogin(event) {
+      event.preventDefault();
+
+      const gmailInput = document.getElementById('login-gmail');
+      const pwdInput = document.getElementById('login-password');
+
+      const gmail = gmailInput.value.trim().toLowerCase();
+      const password = pwdInput.value;
+
+      let valid = true;
+
+      if (!gmail) {
+        showFieldError('login-gmail', 'login-gmail-err', 'Please enter your Gmail address.');
+        valid = false;
+      } else if (!isValidGmail(gmail)) {
+        showFieldError('login-gmail', 'login-gmail-err', 'Please enter a valid @gmail.com address.');
+        valid = false;
+      }
+
+      if (!password) {
+        showFieldError('login-password', 'login-password-err', 'Please enter your password.');
+        valid = false;
+      }
+
+      if (!valid) {
+        showToast('Login Error', 'Enter a valid @gmail.com address and password.', 'magenta');
+        return;
+      }
+
+      const users = loadUsers();
+      const matched = users.find((u) => u.gmail.toLowerCase() === gmail);
+
+      if (!matched) {
+        showFieldError('login-gmail', 'login-gmail-err', 'No account found with this Gmail. Switch to Create Account.');
+        showToast('Account Not Found', 'Create an account with this Gmail first.', 'magenta');
+        return;
+      }
+
+      if (matched.password !== password) {
+        showFieldError('login-password', 'login-password-err', 'Incorrect password for this Gmail account.');
+        showToast('Wrong Password', 'Please check your password and try again.', 'magenta');
+        return;
+      }
+
+      portalState.authenticatedUser = { name: matched.name, gmail: matched.gmail };
+      portalState.currentStage = 'stage2a';
+      persistPortalState();
+
+      document.getElementById('login-password').value = '';
+      renderAllUI();
+      showToast('Logged In!', `Signed in as ${matched.gmail}.`, 'cyan');
+    }
+
+    /**
+     * Toggles social step verification state for '2a', '2b', or '2c'.
+     */
+    function toggleSocialVerification(subId) {
+      const task = portalState.tasks[subId];
+      if (!task) return;
+
+      task.socialDone = !task.socialDone;
+      if (task.socialDone) {
+        document.getElementById(`warn-${subId}`).classList.add('hidden');
+      }
+      persistPortalState();
+      renderSubPortalUI(subId);
+      renderStepperUI();
+
+      if (task.socialDone) {
+        showToast('Step Verified ✓', `Social step ${subId.toUpperCase()} marked as verified.`, 'cyan');
+      } else {
+        showToast('Step Unmarked', `Social step ${subId.toUpperCase()} set back to unverified.`, 'magenta');
+      }
+    }
+
+    /**
+     * Updates stored quiz input and resets quizDone if user edits after failing or changing input.
+     */
+    function handleQuizInputChange(subId) {
+      const task = portalState.tasks[subId];
+      const input = document.getElementById(`input-${subId}-quiz`);
+      if (!task || !input) return;
+
+      task.quizInput = input.value;
+      task.quizDone = false;
+      persistPortalState();
+
+      const statusEl = document.getElementById(`quiz-status-${subId}`);
+      statusEl.textContent = 'Unverified';
+      statusEl.className = 'text-[11px] font-semibold text-amber-300';
+
+      document.getElementById(`feedback-${subId}-quiz`).classList.add('hidden');
+      updateSubPortalBadge(subId);
+      renderStepperUI();
+    }
+
+    /**
+     * Verifies the numeric quiz answer for '2a' (43), '2b' (56), or '2c' (33).
+     */
+    function verifyQuizTask(subId, expectedAnswer) {
+      const task = portalState.tasks[subId];
+      const input = document.getElementById(`input-${subId}-quiz`);
+      const feedback = document.getElementById(`feedback-${subId}-quiz`);
+      const statusEl = document.getElementById(`quiz-status-${subId}`);
+      const quizBox = document.getElementById(`box-${subId}-quiz`);
+
+      if (!task || !input) return;
+
+      const rawVal = input.value.trim();
+      task.quizInput = rawVal;
+
+      if (rawVal === '' || Number.isNaN(Number(rawVal))) {
+        task.quizDone = false;
+        persistPortalState();
+        statusEl.textContent = 'Invalid Input';
+        statusEl.className = 'text-[11px] font-semibold text-red-400';
+        feedback.textContent = '⚠️ Pehle sahi number enter karo aur Verify Task dabao.';
+        feedback.className = 'text-xs font-semibold text-red-400';
+        feedback.classList.remove('hidden');
+        shakeElement(quizBox);
+        return;
+      }
+
+      if (Number(rawVal) === expectedAnswer) {
+        task.quizDone = true;
+        document.getElementById(`warn-${subId}`).classList.add('hidden');
+        persistPortalState();
+
+        statusEl.textContent = 'Verified ✓';
+        statusEl.className = 'text-[11px] font-bold text-emerald-300';
+        feedback.textContent = `✓ Sahi jawab (${expectedAnswer})! Quiz task verified.`;
+        feedback.className = 'text-xs font-semibold text-emerald-300';
+        feedback.classList.remove('hidden');
+
+        updateSubPortalBadge(subId);
+        renderStepperUI();
+        showToast('Quiz Verified ✓', `Answer ${expectedAnswer} is correct!`, 'cyan');
+      } else {
+        task.quizDone = false;
+        persistPortalState();
+
+        statusEl.textContent = 'Wrong Answer';
+        statusEl.className = 'text-[11px] font-bold text-red-400';
+        feedback.textContent = '✗ Galat jawab! Dobara calculate karke Verify Task dabao.';
+        feedback.className = 'text-xs font-semibold text-red-400';
+        feedback.classList.remove('hidden');
+
+        updateSubPortalBadge(subId);
+        renderStepperUI();
+        shakeElement(quizBox);
+        showToast('Galat Jawab', 'Quiz answer sahi nahi hai, dobara try karo.', 'magenta');
+      }
+    }
+
+    /**
+     * Validates that BOTH social verification and quiz verification are complete before moving forward.
+     */
+    function proceedFromStage(subId, nextStageId) {
+      const task = portalState.tasks[subId];
+      const warnBox = document.getElementById(`warn-${subId}`);
+      const socialBox = document.getElementById(`box-${subId}-social`);
+      const quizBox = document.getElementById(`box-${subId}-quiz`);
+
+      const missingSocial = !task.socialDone;
+      const missingQuiz = !task.quizDone;
+
+      if (missingSocial || missingQuiz) {
+        const parts = [];
+        if (missingSocial) {
+          parts.push('Social link verify karo');
+          shakeElement(socialBox);
+        }
+        if (missingQuiz) {
+          parts.push('Math quiz ka sahi jawab verify karo');
+          shakeElement(quizBox);
+        }
+
+        warnBox.innerHTML =
+          `⚠️ Warning: Pehle <strong>${parts.join(' aur ')}</strong>! Tabhi aage ka portal unlock hoga.`;
+        warnBox.classList.remove('hidden', 'stage-enter');
+        void warnBox.offsetWidth;
+        warnBox.classList.add('stage-enter');
+
+        showToast('Tasks Incomplete', 'Pehle dono tasks (Social + Quiz) complete karo!', 'magenta');
+        return;
+      }
+
+      warnBox.classList.add('hidden');
+      portalState.currentStage = nextStageId;
+      persistPortalState();
+      renderAllUI();
+      showToast('Stage Unlocked!', `Moved to ${nextStageId === 'stageLink' ? 'YOUR LINK' : nextStageId.toUpperCase()}.`, 'cyan');
+    }
+
+    /**
+     * Marks Your Link as visited/confirmed and opens the link in a new tab safely.
+     */
+    function handleOpenYourLink() {
+      portalState.yourLinkVisited = true;
+      document.getElementById('warn-your-link').classList.add('hidden');
+      persistPortalState();
+      renderYourLinkUI();
+      renderStepperUI();
+
+      try {
+        window.open(YOUR_LINK_URL, '_blank', 'noopener,noreferrer');
+      } catch (err) {
+        // Ignore popup block errors; link is still confirmed in session
+      }
+
+      showToast('Your Link Verified ✓', 'Link opened and confirmed — Key Generator unlocked!', 'cyan');
+    }
+
+    /**
+     * Copies YOUR LINK URL to clipboard with fallback and confirms link visit.
+     */
+    function handleCopyYourLink() {
+      const afterCopy = () => {
+        portalState.yourLinkVisited = true;
+        document.getElementById('warn-your-link').classList.add('hidden');
+        persistPortalState();
+        renderYourLinkUI();
+        renderStepperUI();
+        showToast('Link Copied & Confirmed ✓', 'YOUR LINK copied — you can now continue to Key Generator.', 'cyan');
+      };
+
+      const fallbackCopy = () => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = YOUR_LINK_URL;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          afterCopy();
+        } catch (err) {
+          showToast('Copy Failed', 'Could not copy link automatically.', 'magenta');
+        }
+      };
+
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(YOUR_LINK_URL).then(afterCopy).catch(fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
+    }
+
+    /**
+     * Advances from YOUR LINK (Step 2.5) to Final Key Generator (Step 3) only after visiting/confirming.
+     */
+    function proceedFromYourLink() {
+      const warnBox = document.getElementById('warn-your-link');
+      const linkBox = document.getElementById('box-your-link');
+
+      if (!portalState.yourLinkVisited) {
+        warnBox.innerHTML =
+          '⚠️ Warning: Pehle <strong>Open Your Link</strong> par click karke link visit ya confirm karo! Tabhi Key Generator unlock hoga.';
+        warnBox.classList.remove('hidden', 'stage-enter');
+        void warnBox.offsetWidth;
+        warnBox.classList.add('stage-enter');
+        shakeElement(linkBox);
+        showToast('Link Not Visited', 'Pehle Your Link open ya confirm karo!', 'magenta');
+        return;
+      }
+
+      warnBox.classList.add('hidden');
+      portalState.currentStage = 'stage3';
+      persistPortalState();
+      renderAllUI();
+      showToast('Key Generator Unlocked!', 'All verification steps completed.', 'cyan');
+    }
+
+    /**
+     * Updates visual state for Step 2.5 YOUR LINK portal.
+     */
+    function renderYourLinkUI() {
+      const badge = document.getElementById('badge-your-link');
+      const statusPill = document.getElementById('status-your-link');
+      const linkBox = document.getElementById('box-your-link');
+      const urlText = document.getElementById('your-link-url-text');
+
+      if (urlText) {
+        urlText.textContent = YOUR_LINK_URL;
+      }
+
+      if (portalState.yourLinkVisited) {
+        badge.textContent = 'Visited ✓';
+        badge.className =
+          'px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-400/15 text-emerald-300 border border-emerald-400/40';
+        statusPill.textContent = 'Visited ✓';
+        statusPill.className =
+          'px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-400/15 text-emerald-300 border border-emerald-400/35 shrink-0';
+        linkBox.classList.remove('border-white/10');
+        linkBox.classList.add('border-emerald-400/35');
+      } else {
+        badge.textContent = 'Visit Required';
+        badge.className =
+          'px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35';
+        statusPill.textContent = 'Pending';
+        statusPill.className =
+          'px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-amber-500/15 text-amber-300 border border-amber-400/35 shrink-0';
+        linkBox.classList.remove('border-emerald-400/35');
+        linkBox.classList.add('border-white/10');
+      }
+    }
+
+    /**
+     * Runs a smooth 1.2s loading animation and reveals ONLY [RAJ-MANNU-B4H-65].
+     */
+    function handleGenerateKey() {
+      if (isGenerating || !isStageUnlocked('stage3')) return;
+
+      isGenerating = true;
+      const genBtn = document.getElementById('generate-key-btn');
+      const copyBtn = document.getElementById('copy-key-btn');
+      const idleEl = document.getElementById('key-idle-state');
+      const loadingEl = document.getElementById('key-loading-state');
+      const readyEl = document.getElementById('key-ready-state');
+      const keyBox = document.getElementById('key-display-box');
+
+      genBtn.disabled = true;
+      genBtn.classList.add('opacity-75', 'cursor-wait');
+
+      idleEl.classList.add('hidden');
+      readyEl.classList.add('hidden');
+      readyEl.classList.remove('flex');
+      loadingEl.classList.remove('hidden');
+      loadingEl.classList.add('flex');
+
+      generateTimer = setTimeout(() => {
+        loadingEl.classList.add('hidden');
+        loadingEl.classList.remove('flex');
+
+        document.getElementById('final-key-text').textContent = EXACT_KEY_STRING;
+        readyEl.classList.remove('hidden');
+        readyEl.classList.add('flex');
+
+        keyBox.classList.remove('border-white/15', 'key-reveal');
+        void keyBox.offsetWidth;
+        keyBox.classList.add('border-neonCyan/60', 'shadow-[0_0_22px_rgba(0,245,212,0.18)]', 'key-reveal');
+
+        portalState.keyGenerated = true;
+        persistPortalState();
+
+        isGenerating = false;
+        genBtn.disabled = false;
+        genBtn.classList.remove('opacity-75', 'cursor-wait');
+
+        enableCopyButton(true);
+        showToast('Key Generated!', `${EXACT_KEY_STRING} is ready.`, 'cyan');
+      }, 1200);
+    }
+
+    /**
+     * Copies [RAJ-MANNU-B4H-65] to clipboard with fallback and displays toast notification.
+     */
+    function handleCopyKey() {
+      if (!portalState.keyGenerated) return;
+
+      const copySuccess = () => {
+        showToast('Copied to Clipboard!', `${EXACT_KEY_STRING} copied successfully.`, 'cyan');
+      };
+
+      const fallbackCopy = () => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = EXACT_KEY_STRING;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          copySuccess();
+        } catch (err) {
+          showToast('Copy Failed', 'Could not copy key automatically.', 'magenta');
+        }
+      };
+
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(EXACT_KEY_STRING).then(copySuccess).catch(fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
+    }
+
+    /**
+     * Resets verification & key progress while keeping the active Gmail session (or starts fresh if signed out).
+     */
+    function handleResetProgress() {
+      if (generateTimer) {
+        clearTimeout(generateTimer);
+        generateTimer = null;
+      }
+      isGenerating = false;
+
+      const keepUser = portalState.authenticatedUser ? { ...portalState.authenticatedUser } : null;
+      portalState = createInitialState();
+      portalState.authenticatedUser = keepUser;
+      portalState.currentStage = keepUser ? 'stage2a' : 'stage1';
+      persistPortalState();
+
+      ['2a', '2b', '2c'].forEach((subId) => {
+        const input = document.getElementById(`input-${subId}-quiz`);
+        if (input) input.value = '';
+        const fb = document.getElementById(`feedback-${subId}-quiz`);
+        if (fb) fb.classList.add('hidden');
+        const warn = document.getElementById(`warn-${subId}`);
+        if (warn) warn.classList.add('hidden');
+      });
+      const linkWarn = document.getElementById('warn-your-link');
+      if (linkWarn) linkWarn.classList.add('hidden');
+
+      resetKeyBoxUI();
+      renderAllUI();
+      showToast('Progress Reset', keepUser ? 'Sub-portals, Your Link & key reset for your account.' : 'All portal progress reset.', 'cyan');
+    }
+
+    /**
+     * Signs out and returns to Portal 1 (Login / Create Account).
+     */
+    function handleSignOut() {
+      if (generateTimer) {
+        clearTimeout(generateTimer);
+        generateTimer = null;
+      }
+      isGenerating = false;
+
+      portalState = createInitialState();
+      persistPortalState();
+
+      ['2a', '2b', '2c'].forEach((subId) => {
+        const input = document.getElementById(`input-${subId}-quiz`);
+        if (input) input.value = '';
+        const fb = document.getElementById(`feedback-${subId}-quiz`);
+        if (fb) fb.classList.add('hidden');
+        const warn = document.getElementById(`warn-${subId}`);
+        if (warn) warn.classList.add('hidden');
+      });
+      const linkWarn = document.getElementById('warn-your-link');
+      if (linkWarn) linkWarn.classList.add('hidden');
+
+      resetKeyBoxUI();
+      renderAllUI();
+      showToast('Signed Out', 'Returned to Portal 1 (Gmail Login / Create Account).', 'cyan');
+    }
+
+    /**
+     * Resets the key display box and disables COPY KEY.
+     */
+    function resetKeyBoxUI() {
+      const idleEl = document.getElementById('key-idle-state');
+      const loadingEl = document.getElementById('key-loading-state');
+      const readyEl = document.getElementById('key-ready-state');
+      const keyBox = document.getElementById('key-display-box');
+
+      idleEl.classList.remove('hidden');
+      loadingEl.classList.add('hidden');
+      loadingEl.classList.remove('flex');
+      readyEl.classList.add('hidden');
+      readyEl.classList.remove('flex');
+      keyBox.classList.remove('border-neonCyan/60', 'shadow-[0_0_22px_rgba(0,245,212,0.18)]', 'key-reveal');
+      keyBox.classList.add('border-white/15');
+      enableCopyButton(false);
+    }
+
+    /**
+     * Enables or disables the COPY KEY button.
+     */
+    function enableCopyButton(enabled) {
+      const copyBtn = document.getElementById('copy-key-btn');
+      if (!copyBtn) return;
+      copyBtn.disabled = !enabled;
+      if (enabled) {
+        copyBtn.className =
+          'py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-white bg-gradient-to-r from-neonMagenta to-[#ff5e9e] hover:brightness-110 active:scale-[0.99] transition-all shadow-[0_0_22px_rgba(255,42,133,0.35)] flex items-center justify-center gap-2.5 cursor-pointer';
+      } else {
+        copyBtn.className =
+          'py-3.5 px-5 rounded-2xl font-display font-bold text-xs sm:text-sm tracking-wider uppercase text-white bg-white/5 border border-white/15 opacity-50 cursor-not-allowed transition-all flex items-center justify-center gap-2.5';
+      }
+    }
+
+    /**
+     * Updates visual state of a sub-portal ('2a', '2b', '2c').
+     */
+    function renderSubPortalUI(subId) {
+      const task = portalState.tasks[subId];
+      const toggleBtn = document.getElementById(`toggle-${subId}-social`);
+      const iconEl = document.getElementById(`icon-${subId}-social`);
+      const labelEl = document.getElementById(`label-${subId}-social`);
+      const socialBox = document.getElementById(`box-${subId}-social`);
+      const quizInput = document.getElementById(`input-${subId}-quiz`);
+      const statusEl = document.getElementById(`quiz-status-${subId}`);
+
+      if (task.socialDone) {
+        toggleBtn.className =
+          'px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all flex items-center gap-2 cursor-pointer bg-emerald-400/15 text-emerald-300 border-emerald-400/40';
+        iconEl.className = 'fa-solid fa-square-check';
+        labelEl.textContent = 'Verified ✓';
+        socialBox.classList.remove('border-white/10');
+        socialBox.classList.add('border-emerald-400/35');
+      } else {
+        toggleBtn.className =
+          'px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all flex items-center gap-2 cursor-pointer bg-white/5 text-gray-300 border-white/15 hover:border-neonCyan/40';
+        iconEl.className = 'fa-regular fa-square';
+        labelEl.textContent = 'Mark Verified';
+        socialBox.classList.remove('border-emerald-400/35');
+        socialBox.classList.add('border-white/10');
+      }
+
+      if (quizInput && quizInput.value !== task.quizInput) {
+        quizInput.value = task.quizInput;
+      }
+
+      if (task.quizDone) {
+        statusEl.textContent = 'Verified ✓';
+        statusEl.className = 'text-[11px] font-bold text-emerald-300';
+      } else if (statusEl.textContent === 'Verified ✓') {
+        statusEl.textContent = 'Unverified';
+        statusEl.className = 'text-[11px] font-semibold text-amber-300';
+      }
+
+      updateSubPortalBadge(subId);
+    }
+
+    /**
+     * Updates the 0/2, 1/2, or 2/2 badge on a sub-portal.
+     */
+    function updateSubPortalBadge(subId) {
+      const task = portalState.tasks[subId];
+      const badge = document.getElementById(`badge-${subId}`);
+      const count = (task.socialDone ? 1 : 0) + (task.quizDone ? 1 : 0);
+
+      badge.textContent = `${count}/2 Tasks Done`;
+      if (count === 2) {
+        badge.className =
+          'px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-400/15 text-emerald-300 border border-emerald-400/40';
+      } else {
+        badge.className =
+          'px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/35';
+      }
+    }
+
+    /**
+     * Renders the top stepper indicator and session status bar.
+     */
+    function renderStepperUI() {
+      const statusText = document.getElementById('session-status-text');
+      const subtitle = document.getElementById('stage-subtitle');
+
+      if (portalState.authenticatedUser) {
+        statusText.textContent = `Signed in: ${portalState.authenticatedUser.gmail}`;
+      } else {
+        statusText.textContent = 'Guest Mode — Complete Stage 1 with Gmail';
+      }
+
+      subtitle.textContent = STAGE_SUBTITLES[portalState.currentStage] || STAGE_SUBTITLES.stage1;
+
+      const stageCompletions = {
+        stage1: Boolean(portalState.authenticatedUser && portalState.authenticatedUser.gmail),
+        stage2a: portalState.tasks['2a'].socialDone && portalState.tasks['2a'].quizDone,
+        stage2b: portalState.tasks['2b'].socialDone && portalState.tasks['2b'].quizDone,
+        stage2c: portalState.tasks['2c'].socialDone && portalState.tasks['2c'].quizDone,
+        stageLink: Boolean(portalState.yourLinkVisited),
+        stage3: portalState.keyGenerated,
+      };
+
+      const stepperBtnMap = {
+        stage1: '1',
+        stage2a: '2a',
+        stage2b: '2b',
+        stage2c: '2c',
+        stageLink: 'link',
+        stage3: '3',
+      };
+
+      STAGE_ORDER.forEach((stageId) => {
+        const suffix = stepperBtnMap[stageId];
+        const btn = document.getElementById(`stepper-btn-${suffix}`);
+        const badge = document.getElementById(`stepper-badge-${suffix}`);
+        const isCurrent = portalState.currentStage === stageId;
+        const isDone = stageCompletions[stageId];
+        const unlocked = isStageUnlocked(stageId);
+
+        if (isCurrent) {
+          btn.className =
+            'py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center bg-neonCyan/15 border-neonCyan text-white shadow-[0_0_14px_rgba(0,245,212,0.22)]';
+          badge.textContent = 'Current';
+          badge.className = 'text-[9px] font-bold mt-0.5 text-neonCyan';
+        } else if (isDone) {
+          btn.className =
+            'py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center bg-emerald-400/10 border-emerald-400/40 text-emerald-200 hover:bg-emerald-400/15';
+          badge.textContent = 'Done ✓';
+          badge.className = 'text-[9px] font-bold mt-0.5 text-emerald-300';
+        } else if (unlocked) {
+          btn.className =
+            'py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center bg-white/5 border-white/15 text-gray-200 hover:border-neonCyan/40';
+          badge.textContent = 'Open';
+          badge.className = 'text-[9px] font-semibold mt-0.5 text-gray-300';
+        } else {
+          btn.className =
+            'py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center bg-[#07090d]/60 border-white/5 text-gray-500 opacity-70';
+          badge.textContent = 'Locked';
+          badge.className = 'text-[9px] font-semibold mt-0.5 text-gray-500';
+        }
+      });
+    }
+
+    /**
+     * Renders all sections according to current stage and persisted state.
+     */
+    function renderAllUI() {
+      if (!isStageUnlocked(portalState.currentStage)) {
+        portalState.currentStage = 'stage1';
+      }
+
+      STAGE_ORDER.forEach((stageId) => {
+        const section = document.getElementById(`portal-${stageId}`);
+        if (!section) return;
+        if (portalState.currentStage === stageId) {
+          section.classList.remove('hidden', 'stage-enter');
+          void section.offsetWidth;
+          section.classList.add('stage-enter');
+        } else {
+          section.classList.add('hidden');
+        }
+      });
+
+      switchAuthMode(portalState.authMode);
+      renderSubPortalUI('2a');
+      renderSubPortalUI('2b');
+      renderSubPortalUI('2c');
+      renderYourLinkUI();
+
+      const summaryGmail = document.getElementById('summary-gmail');
+      if (summaryGmail) {
+        summaryGmail.textContent = portalState.authenticatedUser ? portalState.authenticatedUser.gmail : '—';
+      }
+
+      if (portalState.keyGenerated) {
+        document.getElementById('key-idle-state').classList.add('hidden');
+        document.getElementById('key-loading-state').classList.add('hidden');
+        document.getElementById('key-loading-state').classList.remove('flex');
+        document.getElementById('final-key-text').textContent = EXACT_KEY_STRING;
+        document.getElementById('key-ready-state').classList.remove('hidden');
+        document.getElementById('key-ready-state').classList.add('flex');
+        document.getElementById('key-display-box').classList.add('border-neonCyan/60', 'shadow-[0_0_22px_rgba(0,245,212,0.18)]');
+        enableCopyButton(true);
+      } else {
+        resetKeyBoxUI();
+      }
+
+      renderStepperUI();
+    }
+
+    /**
+     * Triggers a horizontal shake animation on incomplete cards/boxes.
+     */
+    function shakeElement(el) {
+      if (!el) return;
+      el.classList.remove('shake-item');
+      void el.offsetWidth;
+      el.classList.add('shake-item');
+    }
+
+    /**
+     * Shows a non-blocking toast message.
+     */
+    function showToast(title, description, accent = 'cyan') {
+      const toast = document.getElementById('toast');
+      const tTitle = document.getElementById('toast-title');
+      const tDesc = document.getElementById('toast-desc');
+      const iconWrap = document.getElementById('toast-icon-wrap');
+      const icon = document.getElementById('toast-icon');
+
+      tTitle.textContent = title;
+      tDesc.textContent = description;
+
+      if (accent === 'magenta') {
+        iconWrap.className = 'w-8 h-8 rounded-xl bg-neonMagenta/15 border border-neonMagenta/40 text-neonMagenta flex items-center justify-center shrink-0';
+        icon.className = 'fa-solid fa-triangle-exclamation text-sm';
+      } else {
+        iconWrap.className = 'w-8 h-8 rounded-xl bg-neonCyan/15 border border-neonCyan/40 text-neonCyan flex items-center justify-center shrink-0';
+        icon.className = 'fa-solid fa-check text-sm';
+      }
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2800);
+    }
+
+    // Initialize application on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+      hydratePortalState();
+      renderAllUI();
+    });
+  </script>
+</body>
+</html>
